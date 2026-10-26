@@ -1,0 +1,27 @@
+[package]
+name = "bull-monitor"
+version = "0.3.0"
+description = "Monitor de filas Bull/BullMQ em vários servidores Redis"
+authors = ["Renan Nunes"]
+license = "MIT"
+edition = "2021"
+
+[lib]
+name = "bull_monitor_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-shell = "2"
+tauri-plugin-dialog = "2"
+
+# Binário menor e mais rápido de carregar.
+[profile.release]
+codegen-units = 1
+lto = true
+opt-level = "s"
+panic = "abort"
+strip = true

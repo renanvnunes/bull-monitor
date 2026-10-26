@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Bull Monitor</title>
+    <link rel="icon" href="/logo.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/app.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <h1>Bull Monitor</h1>
+      <div class="actions">
+        <div class="lang-select">
+          <button type="button" class="lang-trigger" id="language" aria-haspopup="listbox" aria-expanded="false"
+            aria-controls="language-list" data-i18n-title="language" title="Language">
+            <span class="lang-value"></span>
+            <svg class="lang-chevron" viewBox="0 0 10 6" aria-hidden="true"><path d="M0 0h10L5 6z" /></svg>
+          </button>
+          <ul class="lang-list" id="language-list" role="listbox" tabindex="-1" hidden></ul>
+        </div>
+        <button type="button" class="ghost" id="refresh-all" data-i18n="refresh" data-i18n-title="refreshTitle" title="Refresh now">Refresh</button>
+        <button type="button" class="ghost" id="import-servers" data-i18n="import" data-i18n-title="importTitle" title="Import connections from a JSON file">Import</button>
+        <button type="button" class="ghost" id="export-servers" data-i18n="export" data-i18n-title="exportTitle" title="Export connections to an encrypted JSON file">Export</button>
+        <input type="file" id="import-file" accept=".json,application/json" hidden />
+        <button type="button" class="primary" id="add-server" data-i18n="addServer">+ Add server</button>
+      </div>
+    </header>
+
+    <main>
+      <p class="hint" id="empty" data-i18n-html="empty" hidden>
+        No servers yet. Click <b>Add server</b> to connect to your first Redis.
+      </p>
+      <section class="grid" id="servers" aria-live="polite"></section>
+    </main>
+
+    <dialog id="server-dialog">
+      <form id="server-form" method="dialog">
+        <h2 id="dialog-title">Add server</h2>
+        <input type="hidden" name="id" />
+
+        <label>
+          <span data-i18n="name">Name</span>
+          <input name="name" required data-i18n-placeholder="namePlaceholder" placeholder="Production" autocomplete="off" />
+        </label>
+
+        <div class="segmented" role="group" data-i18n-aria-label="connectionMode" aria-label="How to enter the connection">
+          <button type="button" data-mode="fields" aria-pressed="true" data-i18n="fields">Fields</button>
+          <button type="button" data-mode="url" aria-pressed="false">URL</button>
+        </div>
+
+        <div class="mode-fields">
+          <div class="row">
+            <label class="grow">
+              <span data-i18n="host">Host</span>
+              <input name="host" placeholder="localhost" autocomplete="off" spellcheck="false" />
+            </label>
+            <label class="narrow">
+              <span data-i18n="port">Port</span>
+              <input name="port" type="number" min="1" max="65535" placeholder="6379" />
+            </label>
+          </div>
+          <div class="row">
+            <label class="grow">
+              <span data-i18n="username">Username</span>
+              <input name="username" data-i18n-placeholder="optional" placeholder="optional" autocomplete="off" spellcheck="false" />
+            </label>
+            <label class="grow">
+              <span data-i18n="password">Password</span>
+              <input name="password" type="password" autocomplete="new-password" />
+            </label>
+          </div>
+          <div class="row">
+            <label class="narrow">
+              <span data-i18n="db">Database</span>
+              <input name="db" type="number" min="0" placeholder="0" />
+            </label>
+            <label class="check grow">
+              <input type="checkbox" name="tls" />
+              <span data-i18n="tls">Use TLS</span>
+            </label>
+          </div>
+        </div>
+
+        <label class="mode-url" hidden>
+          <span data-i18n="redisUrl">Redis URL</span>
+          <input name="url" data-i18n-placeholder="urlPlaceholder" placeholder="redis://user:password@host:6379/0" autocomplete="off" spellcheck="false" />
+          <small data-i18n-html="urlHint">Use <code>rediss://</code> for TLS connections.</small>
+        </label>
+
+        <label>
+          <span data-i18n="prefixes">Queue prefixes</span>
+          <input name="prefixes" placeholder="bull" autocomplete="off" spellcheck="false" />
+          <small data-i18n-html="prefixesHint">Comma separated. Empty uses <code>bull</code>, the Bull and BullMQ default.</small>
+        </label>
+
+        <label class="check">
+          <input type="checkbox" name="readOnly" />
+          <span data-i18n="readOnly">Read-only (hides actions such as retry, remove and clean)</span>
+        </label>
+
+        <p class="test-result" id="test-result" role="status"></p>
+
+        <div class="dialog-actions">
+          <button type="button" class="ghost" id="test-connection" data-i18n="testConnection">Test connection</button>
+          <span class="spacer"></span>
+          <button type="button" class="ghost" id="cancel" data-i18n="cancel">Cancel</button>
+          <button type="submit" class="primary" data-i18n="save">Save</button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="password-dialog">
+      <form id="password-form" method="dialog">
+        <h2 id="password-title"></h2>
+        <p class="hint" id="password-hint"></p>
+        <label>
+          <span data-i18n="filePassword">File password</span>
+          <input name="password" type="password" autocomplete="new-password" required />
+        </label>
+        <label id="password-confirm">
+          <span data-i18n="confirmPassword">Confirm password</span>
+          <input name="confirm" type="password" autocomplete="new-password" />
+        </label>
+        <p class="test-result err" id="password-error" role="alert"></p>
+        <div class="dialog-actions">
+          <span class="spacer"></span>
+          <button type="button" class="ghost" id="password-cancel" data-i18n="cancel">Cancel</button>
+          <button type="submit" class="primary" id="password-submit"></button>
+        </div>
+      </form>
+    </dialog>
+
+    <dialog id="opening-dialog" class="opening">
+      <div class="spinner" aria-hidden="true"></div>
+      <p id="opening-text" role="status"></p>
+      <small data-i18n="openingHint">The first time, queues are searched across the whole Redis; with many keys this takes a few seconds.</small>
+      <button type="button" class="ghost" id="opening-cancel" data-i18n="cancel">Cancel</button>
+    </dialog>
+
+    <template id="card-template">
+      <article class="card">
+        <div class="card-head">
+          <span class="dot" aria-hidden="true"></span>
+          <h3 class="name"></h3>
+          <span class="badge readonly" data-i18n="readOnlyBadge" hidden>read-only</span>
+        </div>
+        <p class="url"></p>
+        <dl class="stats">
+          <div><dt data-i18n="queues">Queues</dt><dd data-k="queues">–</dd></div>
+          <div><dt data-i18n="waiting">Waiting</dt><dd data-k="waiting">–</dd></div>
+          <div><dt data-i18n="active">Active</dt><dd data-k="active">–</dd></div>
+          <div><dt data-i18n="delayed">Delayed</dt><dd data-k="delayed">–</dd></div>
+          <div class="failed"><dt data-i18n="failed">Failed</dt><dd data-k="failed">–</dd></div>
+        </dl>
+        <p class="error" hidden></p>
+        <div class="card-actions">
+          <a class="button primary open" data-i18n="open">Open</a>
+          <button type="button" class="ghost rescan" data-i18n-title="rescan" data-i18n-aria-label="rescan" title="Look for new queues" aria-label="Look for new queues">↻</button>
+          <span class="spacer"></span>
+          <button type="button" class="ghost edit" data-i18n="edit">Edit</button>
+          <button type="button" class="ghost danger remove" data-i18n="remove">Remove</button>
+        </div>
+      </article>
+    </template>
+
+    <script src="/i18n.js"></script>
+    <script src="/app.js"></script>
+  </body>
+</html>

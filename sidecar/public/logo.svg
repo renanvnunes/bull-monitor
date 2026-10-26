@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="red" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#EE4A5E"/>
+      <stop offset="1" stop-color="#C9243A"/>
+    </linearGradient>
+    <linearGradient id="gloss" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fff" stop-opacity=".18"/>
+      <stop offset=".5" stop-color="#fff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="10" stdDeviation="12" flood-color="#000" flood-opacity=".25"/>
+    </filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <circle cx="512" cy="502" r="470" fill="url(#red)"/>
+    <circle cx="512" cy="502" r="364" fill="#fff"/>
+    <circle cx="512" cy="502" r="264" fill="url(#red)"/>
+    <circle cx="512" cy="502" r="164" fill="#fff"/>
+    <circle cx="512" cy="502" r="72" fill="url(#red)"/>
+  </g>
+  <circle cx="512" cy="502" r="470" fill="url(#gloss)"/>
+  <circle cx="512" cy="502" r="28" fill="#FFAC33"/>
+</svg>

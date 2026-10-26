@@ -1,0 +1,28 @@
+# Dependências
+node_modules/
+
+# Builds do Tauri/Rust
+src-tauri/target/
+src-tauri/gen/
+
+# Gerados pelo scripts/build-sidecar.sh
+src-tauri/binaries/
+src-tauri/resources/
+
+# Temporários do `bun build --compile` quando ele é interrompido
+*.bun-build
+
+# Variáveis de ambiente (podem conter URLs de Redis com senha)
+.env
+.env.*
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editores e sistema
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db

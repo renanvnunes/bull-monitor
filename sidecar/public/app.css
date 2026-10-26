@@ -1,0 +1,256 @@
+:root {
+  color-scheme: light dark;
+  --bg: #f6f7f9;
+  --card: #ffffff;
+  --fg: #1d2330;
+  --muted: #667085;
+  --border: #e3e6eb;
+  --primary: #2f6fed;
+  --primary-fg: #ffffff;
+  --danger: #d43c3c;
+  --ok: #1f9d55;
+  --off: #9aa3b2;
+  --radius: 10px;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #12151b;
+    --card: #1b1f27;
+    --fg: #e6e9ef;
+    --muted: #98a2b3;
+    --border: #2b313c;
+    --primary: #5b8cff;
+    --danger: #ff6b6b;
+    --ok: #3ccf7e;
+    --off: #5d6675;
+  }
+}
+
+* { box-sizing: border-box; }
+/* Regras como "form label { display: flex }" venceriam o atributo hidden. */
+[hidden] { display: none !important; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 14px;
+}
+
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
+  position: sticky;
+  top: 0;
+  /* Acima dos cards, para a lista de idiomas aberta não ficar por baixo deles. */
+  z-index: 10;
+}
+
+.topbar h1 { font-size: 18px; margin: 0; }
+.actions { display: flex; gap: 8px; }
+
+main { padding: 24px; }
+.hint { color: var(--muted); }
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card-head { display: flex; align-items: center; gap: 8px; }
+.card-head h3 { margin: 0; font-size: 16px; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--off); flex: none; }
+.card[data-status='online'] .dot { background: var(--ok); }
+.card[data-status='offline'] .dot { background: var(--danger); }
+.card[data-status='loading'] .dot { animation: pulse 1s infinite alternate; }
+@keyframes pulse { to { opacity: 0.3; } }
+
+.badge { font-size: 11px; padding: 2px 6px; border-radius: 999px; border: 1px solid var(--border); color: var(--muted); }
+
+.url {
+  margin: 0;
+  color: var(--muted);
+  font-family: ui-monospace, monospace;
+  font-size: 12px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin: 0; }
+.stats div { text-align: center; }
+.stats dt { font-size: 11px; color: var(--muted); }
+.stats dd { margin: 2px 0 0; font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.card .failed dd.has { color: var(--danger); }
+
+.error { margin: 0; color: var(--danger); font-size: 12px; word-break: break-word; }
+
+.card-actions, .dialog-actions { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.spacer { flex: 1; }
+.card-actions button, .card-actions .button { padding: 6px 10px; font-size: 13px; }
+
+button, .button {
+  font: inherit;
+  padding: 7px 12px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--fg);
+  cursor: pointer;
+  text-decoration: none;
+  line-height: 1.2;
+}
+button:hover, .button:hover { border-color: var(--muted); }
+button:disabled { opacity: 0.6; cursor: progress; }
+.primary { background: var(--primary); border-color: var(--primary); color: var(--primary-fg); }
+.primary:hover { filter: brightness(1.08); border-color: var(--primary); }
+.danger { color: var(--danger); }
+
+/* Seletor de idioma no mesmo desenho do select do bull-board, com a cor primária desta tela. */
+.lang-select { position: relative; }
+.lang-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 96px;
+  background: var(--card);
+}
+.lang-chevron { width: 0.7rem; height: 0.7rem; fill: var(--muted); transition: transform 0.15s ease-out; }
+.lang-trigger[aria-expanded='true'] .lang-chevron { transform: rotate(180deg); }
+.lang-list {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  z-index: 100;
+  min-width: 100%;
+  /* Os 12 idiomas cabem inteiros mesmo na altura mínima da janela; a rolagem é só reserva. */
+  max-height: calc(100vh - 72px);
+  overflow-y: auto;
+  margin: 0;
+  padding: 4px;
+  list-style: none;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  box-shadow: 0 10px 24px -6px #00000029, 0 4px 8px -4px #0000001a;
+}
+.lang-list:focus { outline: none; }
+.lang-list li {
+  display: grid;
+  grid-template-columns: 1rem 1fr;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 24px 6px 8px;
+  border-radius: 5px;
+  line-height: 1.25rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.lang-list svg { width: 0.75rem; height: 0.75rem; fill: none; stroke: currentColor; stroke-width: 1.6; visibility: hidden; }
+.lang-list li.highlighted { background: color-mix(in srgb, var(--primary) 8%, transparent); }
+.lang-list li[aria-selected='true'] { background: color-mix(in srgb, var(--primary) 16%, transparent); color: var(--primary); }
+.lang-list li[aria-selected='true'].highlighted { background: color-mix(in srgb, var(--primary) 24%, transparent); }
+.lang-list li[aria-selected='true'] svg { visibility: visible; }
+
+dialog {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--card);
+  color: var(--fg);
+  padding: 20px;
+  width: min(520px, calc(100vw - 32px));
+  max-height: calc(100vh - 96px);
+}
+/* O ::backdrop é pintado numa camada acima de tudo e do tamanho da janela inteira. No app, isso
+   cobre a área transparente da sombra com um retângulo de cantos retos. Por isso o escurecimento é
+   feito dentro do body, que já tem os cantos arredondados. */
+dialog::backdrop { background: transparent; }
+body:has(dialog[open])::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: rgb(0 0 0 / 0.45);
+  z-index: 1000;
+}
+
+dialog.opening {
+  width: min(360px, calc(100vw - 32px));
+  text-align: center;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+dialog.opening[open] { display: flex; }
+dialog.opening p { margin: 0; font-weight: 500; }
+dialog.opening small { color: var(--muted); }
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid var(--primary);
+  border-right-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 2px;
+  margin-bottom: 12px;
+}
+.segmented button { border: 0; padding: 5px 14px; border-radius: 5px; }
+.segmented button[aria-pressed='true'] { background: var(--primary); color: var(--primary-fg); }
+
+.row { display: flex; gap: 10px; align-items: flex-end; }
+.row .grow { flex: 1; min-width: 0; }
+.row .narrow { width: 110px; flex: none; }
+.row label.check { margin-bottom: 20px; }
+
+button:focus-visible, .button:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+dialog h2 { margin: 0 0 14px; font-size: 17px; }
+
+form label { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; font-weight: 500; }
+form label.check { flex-direction: row; align-items: center; gap: 8px; font-weight: 400; }
+form small { color: var(--muted); font-weight: 400; }
+
+input:not([type='checkbox']) {
+  font: inherit;
+  padding: 8px 10px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--fg);
+}
+input:focus { outline: 2px solid var(--primary); outline-offset: -1px; }
+
+.test-result { min-height: 1.2em; margin: 0 0 12px; font-size: 13px; }
+.test-result.ok { color: var(--ok); }
+.test-result.err { color: var(--danger); }
+
+code { font-family: ui-monospace, monospace; font-size: 12px; }

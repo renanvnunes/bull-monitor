@@ -1,0 +1,11 @@
+# As actions do workflow de release estão fixadas pelo hash do commit; o Dependabot abre um PR
+# quando sai versão nova, já com o hash e o comentário da versão atualizados.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ['*']

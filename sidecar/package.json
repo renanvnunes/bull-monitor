@@ -1,0 +1,23 @@
+{
+  "name": "bull-monitor-sidecar",
+  "version": "0.3.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "bun --watch src/index.ts",
+    "start": "bun src/index.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@bull-board/api": "9.10.4",
+    "@bull-board/bun": "9.10.4",
+    "@bull-board/ui": "9.10.4",
+    "bull": "^4.16.5",
+    "bullmq": "^5.81.5",
+    "ioredis": "^5.8.2"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.4",
+    "typescript": "^5.9.3"
+  }
+}
