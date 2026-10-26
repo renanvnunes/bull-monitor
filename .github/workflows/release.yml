@@ -52,6 +52,9 @@ jobs:
           - name: Linux ARM64
             runner: ubuntu-22.04-arm
             target: aarch64-unknown-linux-gnu
+            # Sem AppImage: o linuxdeploy passa o patchelf no sidecar (Bun) para mudar o rpath, e
+            # no ARM64 o binário sai corrompido (o ldd do plugin gtk falha nele em seguida).
+            bundles: deb,rpm
           - name: Windows x64
             runner: windows-latest
             target: x86_64-pc-windows-msvc
@@ -102,13 +105,10 @@ jobs:
         uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # v0.6.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # O linuxdeploy, que monta o AppImage, também é um AppImage e precisa de FUSE para rodar;
-          # o runner ARM não tem. Assim ele se extrai e roda sem FUSE.
-          APPIMAGE_EXTRACT_AND_RUN: 1
         with:
           tauriScript: bun tauri
           # --verbose: sem ele, uma falha do linuxdeploy aparece só como "failed to run linuxdeploy".
-          args: --target ${{ matrix.target }} --verbose
+          args: --target ${{ matrix.target }} --verbose ${{ matrix.bundles && format('--bundles {0}', matrix.bundles) || '' }}
           # Com tag: anexa os instaladores ao rascunho; o job publish o torna público no fim.
           tagName: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
           releaseName: Bull Monitor ${{ github.ref_name }}
