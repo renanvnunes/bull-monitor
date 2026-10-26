@@ -73,7 +73,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential file libxdo-dev libssl-dev \
-            libayatana-appindicator3-dev librsvg2-dev patchelf
+            libayatana-appindicator3-dev librsvg2-dev patchelf libfuse2
 
       # O beforeBuildCommand chama `bash scripts/build-sidecar.sh`; sem isto, o `bash` do PATH no
       # Windows pode ser o do WSL, que não existe no runner.
@@ -102,9 +102,13 @@ jobs:
         uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5 # v0.6.2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # O linuxdeploy, que monta o AppImage, também é um AppImage e precisa de FUSE para rodar;
+          # o runner ARM não tem. Assim ele se extrai e roda sem FUSE.
+          APPIMAGE_EXTRACT_AND_RUN: 1
         with:
           tauriScript: bun tauri
-          args: --target ${{ matrix.target }}
+          # --verbose: sem ele, uma falha do linuxdeploy aparece só como "failed to run linuxdeploy".
+          args: --target ${{ matrix.target }} --verbose
           # Com tag: anexa os instaladores ao rascunho; o job publish o torna público no fim.
           tagName: ${{ startsWith(github.ref, 'refs/tags/') && github.ref_name || '' }}
           releaseName: Bull Monitor ${{ github.ref_name }}
